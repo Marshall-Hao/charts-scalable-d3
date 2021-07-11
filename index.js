@@ -34,10 +34,10 @@ const yAxis = d3.axisLeft(y)
     .tickFormat(d => d + ' orders');
 
 // update x axis text
-xAxisGroup.selectAll('text')
-    .attr('transform', 'rotate(-40)')
-    .attr('text-anchor', 'end')// rotate point, end of the text
-    .attr('fill', 'orange')
+// xAxisGroup.selectAll('text')
+//     .attr('transform', 'rotate(-40)')
+//     .attr('text-anchor', 'end')// rotate point, end of the text
+//     .attr('fill', 'orange')
 
 //update function
 const update = (data) => {
@@ -55,10 +55,11 @@ const update = (data) => {
 
     // update current shapes in dom
     rects.attr('width', x.bandwidth)
-        .attr('height', d => graphHeight -  y(d.orders))
         .attr('fill', 'orange')
         .attr('x', d => x(d.name))
-        .attr('y', d => y(d.orders))
+        .transition().duration(500)
+            .attr('height', d => graphHeight -  y(d.orders))
+            .attr('y', d => y(d.orders))
 
     rects.enter()
         .append('rect')
@@ -74,6 +75,10 @@ const update = (data) => {
     // call axies
     xAxisGroup.call(xAxis);
     yAxisGroup.call(yAxis);
+    xAxisGroup.selectAll('text')
+    .attr('transform', 'rotate(-40)')
+    .attr('text-anchor', 'end')// rotate point, end of the text
+    .attr('fill', 'orange')
 };
 
 // d3.json('menu.json')
