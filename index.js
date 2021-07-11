@@ -74,16 +74,49 @@ const update = (data) => {
 };
 
 // d3.json('menu.json')
-db.collection('dishes').get().then(res => {
-    var data = [];
-    res.docs.forEach(doc => {
-        data.push(doc.data());       
-    });
-    // const min = d3.min(data, d => d.orders);
-    // const max = d3.max(data, d => d.orders);
-    // const extent = d3.extent(data, d => d.orders); // array of min&max
+// db.collection('dishes').get().then(res => {
+//     var data = [];
+//     res.docs.forEach(doc => {
+//         data.push(doc.data());       
+//     });
+//     // const min = d3.min(data, d => d.orders);
+//     // const max = d3.max(data, d => d.orders);
+//     // const extent = d3.extent(data, d => d.orders); // array of min&max
 
-    update(data);
+    
+//     update(data);
 
+//     d3.interval(() => {
+//         // data[0].orders += 50;
+//         // update(data);
+//     }, 1000)
+
+// })
+//firebase snapshot realtime-data method
+var data = [];
+
+db.collection('dishes').onSnapshot(res => {
+  
+  res.docChanges().forEach(change => {
+
+    const doc = {...change.doc.data(), id: change.doc.id};
+
+    switch (change.type) {
+      case 'added':
+        data.push(doc);
+        break;
+      case 'modified':
+        const index = data.findIndex(item => item.id == doc.id);
+        data[index] = doc;
+        break;
+      case 'removed':
+        data = data.filter(item => item.id !== doc.id);
+        break;
+      default:
+        break;
+    }
+
+    })
+
+    update(data)
 })
-
