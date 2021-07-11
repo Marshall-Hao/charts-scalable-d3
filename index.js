@@ -17,26 +17,43 @@ const xAxisGroup = graph.append('g')
     .attr('transform',`translate(0,${graphHeight})`);
 const yAxisGroup = graph.append('g');
 
-d3.json('menu.json').then(data => {
-    const min = d3.min(data, d => d.orders);
-    const max = d3.max(data, d => d.orders);
-    const extent = d3.extent(data, d => d.orders); // array of min&max
-
-    const y = d3.scaleLinear()
-        .domain([0,max])
-        .range([graphHeight, 0]);
+//scales
+const y = d3.scaleLinear()
+.range([graphHeight, 0]);
 
 
-    const x = d3.scaleBand()
-        .domain(data.map(item => item.name)) // x domain for the x-axis name
-        .range([0,500])
-        .paddingInner(0.2)
-        .paddingOuter(0.2);
+const x = d3.scaleBand()
+.range([0,500])
+.paddingInner(0.2)
+.paddingOuter(0.2);
 
-    //join data to rects
+//create and call the axes
+const xAxis = d3.axisBottom(x);
+const yAxis = d3.axisLeft(y)
+    .ticks(3)
+    .tickFormat(d => d + ' orders');
+
+// update x axis text
+xAxisGroup.selectAll('text')
+    .attr('transform', 'rotate(-40)')
+    .attr('text-anchor', 'end')// rotate point, end of the text
+    .attr('fill', 'orange')
+
+//update function
+const update = (data) => {
+
+    // updating scale domains
+    y.domain([0,d3.max(data, d => d.orders)])
+    x.domain(data.map(item => item.name))
+
+    // join data to rects
     const rects = graph.selectAll('rect')
         .data(data)
+    
+    // remove exit selection
+    rects.exit().remove();
 
+    // update current shapes in dom
     rects.attr('width', x.bandwidth)
         .attr('height', d => graphHeight -  y(d.orders))
         .attr('fill', 'orange')
@@ -51,17 +68,22 @@ d3.json('menu.json').then(data => {
         .attr('x', d => x(d.name))
         .attr('y', d => y(d.orders))
 
-    //create and call the axes
-    const xAxis = d3.axisBottom(x);
-    const yAxis = d3.axisLeft(y)
-        .ticks(3)
-        .tickFormat(d => d + ' orders');
-
+    // call axies
     xAxisGroup.call(xAxis);
     yAxisGroup.call(yAxis);
+};
 
-    xAxisGroup.selectAll('text')
-        .attr('transform', 'rotate(-40)')
-        .attr('text-anchor', 'end')// rotate point, end of the text
-        .attr('fill', 'orange')
-    })
+// d3.json('menu.json')
+db.collection('dishes').get().then(res => {
+    var data = [];
+    res.docs.forEach(doc => {
+        data.push(doc.data());       
+    });
+    // const min = d3.min(data, d => d.orders);
+    // const max = d3.max(data, d => d.orders);
+    // const extent = d3.extent(data, d => d.orders); // array of min&max
+
+    update(data);
+
+})
+
