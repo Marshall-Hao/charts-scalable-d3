@@ -41,7 +41,8 @@ const yAxis = d3.axisLeft(y)
 
 //update function
 const update = (data) => {
-
+    
+    const t = d3.transition().duration(500);
     // updating scale domains
     y.domain([0,d3.max(data, d => d.orders)])
     x.domain(data.map(item => item.name))
@@ -57,10 +58,10 @@ const update = (data) => {
     rects.attr('width', x.bandwidth)
         .attr('fill', 'orange')
         .attr('x', d => x(d.name))
-        .transition().duration(500)
-            .attr('height', d => graphHeight -  y(d.orders))
-            .attr('y', d => y(d.orders))
-
+            // .transition(t)
+            // .attr('height', d => graphHeight -  y(d.orders))
+            // .attr('y', d => y(d.orders))     merge!
+ 
     rects.enter()
         .append('rect')
         .attr('width', x.bandwidth)
@@ -68,9 +69,11 @@ const update = (data) => {
         .attr('fill', 'orange')
         .attr('x', d => x(d.name))
         .attr('y', graphHeight)
-        .transition().duration(500)
-            .attr('y', d => y(d.orders))
+            .merge(rects)   // deduct the code size with merge method
+            .transition(t)
             .attr('height', d => graphHeight -  y(d.orders))
+            .attr('y', d => y(d.orders))
+
             
     // call axies
     xAxisGroup.call(xAxis);
