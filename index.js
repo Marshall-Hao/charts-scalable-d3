@@ -42,7 +42,7 @@ const yAxis = d3.axisLeft(y)
 //update function
 const update = (data) => {
     
-    const t = d3.transition().duration(500);
+    const t = d3.transition().duration(1500);
     // updating scale domains
     y.domain([0,d3.max(data, d => d.orders)])
     x.domain(data.map(item => item.name))
@@ -64,13 +64,14 @@ const update = (data) => {
  
     rects.enter()
         .append('rect')
-        .attr('width', x.bandwidth)
+        // .attr('width', 0)
         .attr('height', 0)
         .attr('fill', 'orange')
         .attr('x', d => x(d.name))
         .attr('y', graphHeight)
             .merge(rects)   // deduct the code size with merge method
             .transition(t)
+            .attrTween('width', widthTween)
             .attr('height', d => graphHeight -  y(d.orders))
             .attr('y', d => y(d.orders))
 
@@ -132,5 +133,13 @@ db.collection('dishes').onSnapshot(res => {
     update(data);
 });
 
+// TWEENS
 
+const widthTween = (d) => {
+    let i = d3.interpolate(0, x.bandwidth());
+
+    return (t) => {
+        return i(t);
+    }
+}
 
