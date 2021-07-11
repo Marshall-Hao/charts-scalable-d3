@@ -63,11 +63,14 @@ const update = (data) => {
     rects.enter()
         .append('rect')
         .attr('width', x.bandwidth)
-        .attr('height', d => graphHeight -  y(d.orders))
+        .attr('height', 0)
         .attr('fill', 'orange')
         .attr('x', d => x(d.name))
-        .attr('y', d => y(d.orders))
-
+        .attr('y', graphHeight)
+        .transition().duration(500)
+            .attr('y', d => y(d.orders))
+            .attr('height', d => graphHeight -  y(d.orders))
+            
     // call axies
     xAxisGroup.call(xAxis);
     yAxisGroup.call(yAxis);
@@ -116,7 +119,10 @@ db.collection('dishes').onSnapshot(res => {
         break;
     }
 
-    })
+    });
 
-    update(data)
-})
+    update(data);
+});
+
+
+
